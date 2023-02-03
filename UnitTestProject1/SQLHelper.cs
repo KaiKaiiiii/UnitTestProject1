@@ -9,8 +9,7 @@ public static class DataLogic
     public static class SqlHelper
     {
         // Set the connection, command, and then execute the command with non query.  
-        public static Int32 ExecuteNonQuery(String connectionString, String commandText,
-            CommandType commandType)
+        public static Int32 ExecuteNonQuery(String connectionString, String commandText, CommandType commandType)
         {
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
@@ -27,8 +26,7 @@ public static class DataLogic
         }
 
         // Set the connection, command, and then execute the command and only return one value.  
-        public static Object ExecuteScalar(String connectionString, String commandText,
-            CommandType commandType)
+        public static Object ExecuteScalar(String connectionString, String commandText, CommandType commandType)
         {
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
@@ -43,8 +41,7 @@ public static class DataLogic
         }
 
         // Set the connection, command, and then execute the command with query and return the reader.  
-        public static SqlDataReader ExecuteReader(String connectionString, String commandText,
-            CommandType commandType)
+        public static SqlDataReader ExecuteReader(String connectionString, String commandText, CommandType commandType)
         {
             SqlConnection conn = new SqlConnection(connectionString);
 

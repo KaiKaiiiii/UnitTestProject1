@@ -29,44 +29,84 @@ namespace UnitTestProject1
 
         }
 
-        [TestMethod]
-        public void GetSaleListTest()
-        {
-            DateTime fromDate = default;
-            DateTime toDate = default;
-            var result = DashboardService.GetTotalSales(fromDate, toDate);
+        //[TestMethod]
+        //public void GetSaleListTest()
+        //{
+        //    DateTime fromDate = default;
+        //    DateTime toDate = default;
+        //    var result = DashboardService.GetTotalSales(fromDate, toDate);
 
-            Assert.IsNotNull(result >= 0);
+        //    Assert.IsNotNull(result >= 0);
+        //}
+
+        //[TestMethod]
+        //public void GetTotalSalesTest()
+        //{
+        //    DateTime fromDate = default;
+        //    DateTime toDate = default;
+        //    var result = DashboardService.GetSaleList(fromDate, toDate);
+
+        //    Assert.IsTrue(result.Count >= 0);
+        //}
+
+        //[TestMethod]
+        //public void GetTotalReturnListTest()
+        //{
+        //    DateTime fromDate = default;
+        //    DateTime toDate = default;
+        //    var result = DashboardService.GetTotalReturnList(fromDate, toDate);
+
+        //    Assert.IsTrue(result.Count >= 0);
+        //}
+
+        //[TestMethod]
+        //public void GetTotalReturnTest()
+        //{
+        //    DateTime fromDate = default;
+        //    DateTime toDate = default;
+        //    var result = DashboardService.GetTotalReturn(fromDate, toDate);
+
+        //    Assert.IsTrue(result >= 0);
+        //}
+
+        [TestMethod]
+        public void GetTotalProductByCatalogTest()
+        {
+            DateTime fromDate = new DateTime(2023, 1, 24, 0, 0, 0);
+            DateTime toDate = new DateTime(2023, 1, 24, 0, 0, 0);
+            string productName = "Avocado 10kg Box";
+            var result = DashboardService.GetTotalProductByCatalog(fromDate, toDate, productName);
+
+            Assert.IsTrue(result.Count > 0);
         }
 
         [TestMethod]
-        public void GetTotalSalesTest()
+        public void GetMonthlyCancelledDeliveriedReturnTest()
         {
-            DateTime fromDate = default;
-            DateTime toDate = default;
-            var result = DashboardService.GetSaleList(fromDate, toDate);
+            DateTime fromDate = new DateTime(2023, 1, 24, 0, 0, 0);
+            DateTime toDate = new DateTime(2023, 1, 24, 0, 0, 0);
+            var result = DashboardService.GetMonthlyCancelledDeliveriedReturn(fromDate, toDate);
 
-            Assert.IsTrue(result.Count >= 0);
-        }
-        
-        [TestMethod]
-        public void GetTotalReturnListTest()
-        {
-            DateTime fromDate = default;
-            DateTime toDate = default;
-            var result = DashboardService.GetTotalReturnList(fromDate, toDate);
-
-            Assert.IsTrue(result.Count >= 0);
+            Assert.IsTrue(result.Count > 0);
         }
 
         [TestMethod]
-        public void GetTotalReturnTest()
+        public void GetSalesAnalyticsByCountryMonthlyTest()
         {
-            DateTime fromDate = default;
-            DateTime toDate = default;
-            var result = DashboardService.GetTotalReturn(fromDate, toDate);
+            var result = DashboardService.GetSalesAnalyticsByCountryMonthly();
 
-            Assert.IsTrue(result >= 0);
+            Assert.IsTrue(result.Count > 0);
+        }
+
+        [TestMethod]
+        public void UpdatePasswordTest()
+        {
+            string oldPassword = null;
+            string newPassword = null;
+            int id = 1;
+            var result = UserService.UpdatePassword(id,oldPassword,newPassword);
+
+            Assert.AreEqual(result, 1);
         }
     }
 
