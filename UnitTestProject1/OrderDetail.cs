@@ -3,7 +3,6 @@
     internal class OrderDetail : Order
     {
         public int TotalPerProductPrice { get; set; }
-        public int Quantity { get; internal set; }
-
+        public int Quantity { get; internal set; 
     }
 }
