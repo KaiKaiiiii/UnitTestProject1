@@ -10,23 +10,28 @@ namespace UnitTestProject1
     {
         public static class DashboardService
         {
-            private static readonly string _connectionString = @"Data Source=.;Initial Catalog=OMSDb;Integrated Security=True";
+
 
             internal static List<DashboardTotalOrderItem> GetMonthlyCancelledDeliveriedReturn(DateTime fromDate, DateTime toDate)
             {
                 var sql = string.Format(@"
-               SELECT COUNT(CASE
-                            WHEN od.OrderStatus = 'DELIVERY' THEN 1
-                            END) AS TotalDelivery,
-                      COUNT(CASE
-                            WHEN od.OrderStatus = 'FAILED' THEN 1
-                            END) AS TotalCancel,
-                      COUNT(CASE
-                            WHEN re.ReturnStatus = 'APPROVED' THEN 1
-                            END) AS TotalReturn
-               FROM [Order] AS od,
-                    [Return] AS re
-               WHERE od.OrderDate BETWEEN '{0}' AND '{1}'
+                SELECT datepart(WEEK, od.OrderedAt) AS WeekNumber,
+                       SUM(CASE
+                               WHEN od.OrderStatus = 'DELIVERY' THEN 1
+                               ELSE 0
+                               END) AS TotalDelivery,
+                       SUM(CASE
+                               WHEN od.OrderStatus = 'FAILED' THEN 1
+                               ELSE 0
+                               END) AS TotalCancel,
+                       SUM(CASE
+                               WHEN re.ReturnStatus = 'APPROVED' THEN 1
+                               ELSE 0
+                               END) AS TotalReturn
+                FROM OrderList AS od
+                LEFT JOIN ReturnList AS re ON od.Id = re.OrderId
+                WHERE CAST(od.orderedAt AS DATE) BETWEEN '{0}' AND '{1}'
+                GROUP BY datepart(WEEK, od.OrderedAt)
                 ", fromDate, toDate);
                 var reader = SqlHelper.ExecuteReader(_connectionString, sql, CommandType.Text);
                 var result = new List<DashboardTotalOrderItem>();
@@ -34,9 +39,10 @@ namespace UnitTestProject1
                 {
                     result.Add(new DashboardTotalOrderItem
                     {
-                        TotalDelivery = reader[0],
-                        TotalCancel = reader[1],
-                        TotalReturn = reader[2]
+                        WeekNumber = Convert.ToInt32(reader[0]),
+                        TotalDelivery = Convert.ToInt32(reader[1]),
+                        TotalCancel = Convert.ToInt32(reader[2]),
+                        TotalReturn = Convert.ToInt32(reader[3])
                     });
                 }
                 return result;
@@ -45,15 +51,18 @@ namespace UnitTestProject1
             internal static List<DashboardSaleByLocationItem> GetSalesAnalyticsByCountryMonthly()
             {
                 var sql = string.Format(@"
-                SELECT month(ord.OrderDate) AS MONTH,
-                       ctr.name,
-                       SUM(ord.TotalPrice) AS TotalPrice
-                FROM [Country] AS ctr
-                JOIN [Channel] AS chn ON ctr.Id = chn.CountryId
-                JOIN [Order] AS ord ON chn.Id = ord.ChannelId
-                GROUP BY month(ord.OrderDate),
-                         ctr.name
-                ORDER BY month(ord.OrderDate)");
+                   SELECT month(ord.OrderedAt) AS MONTH,
+                          year(ord.OrderedAt) AS YEAR,
+                          ctr.CountryName,
+                          SUM(ord.TotalPrice) AS TotalPrice
+                    FROM Country AS ctr
+                    JOIN Channel AS chn ON ctr.Id = chn.CountryId
+                    JOIN OrderList AS ord ON chn.Id = ord.ChannelId
+                    GROUP BY month(ord.OrderedAt),
+                             year(ord.OrderedAt),
+                             ctr.CountryName
+                    ORDER BY year(ord.OrderedAt),
+                             month(ord.OrderedAt)");
 
                 var reader = SqlHelper.ExecuteReader(_connectionString, sql, CommandType.Text);
                 var result = new List<DashboardSaleByLocationItem>();
@@ -62,11 +71,11 @@ namespace UnitTestProject1
                 {
                     result.Add(new DashboardSaleByLocationItem
                     {
-                        Year = Int32.Parse(reader[0]+""),
-                        Month = Int32.Parse(reader[1] + ""),
+                        Year = Convert.ToInt32(reader[0]),
+                        Month = Convert.ToInt32(reader[1]),
                         Location = Convert.ToString(reader[2]),
-                        Total = long.Parse(reader[3] + "")
-                    }); ;
+                        Total = Convert.ToInt64(reader[3])
+                    });
                 }
                 return result;
             }
@@ -74,14 +83,14 @@ namespace UnitTestProject1
             internal static List<DashboardItem> GetTotalProductByCatalog(DateTime fromDate, DateTime toDate, string productName)
             {
                 var sql = string.Format(@"
-               SELECT ord.OrderDate,
-                      SUM(ord.TotalPrice) AS Total
-               FROM [Order] AS ord
-               JOIN [OrderDetail] AS odt ON ord.Id = odt.OrderId
-               JOIN [Product] AS prd ON odt.ProductId = prd.Id
-               AND prd.ProductName LIKE '%{0}%'
-               WHERE ord.OrderDate BETWEEN '{1}' AND '{2}'
-               GROUP BY ord.OrderDate
+                   SELECT CAST(ord.OrderedAt AS date),
+                          SUM(ord.TotalPrice) AS Total
+                   FROM OrderList AS ord
+                   JOIN OrderDetail AS odt ON ord.Id = odt.OrderId
+                   JOIN Product AS prd ON odt.ProductId = prd.Id
+                   AND prd.ProductName LIKE '%{0}%'
+                   WHERE CASE(ord.OrderedAt AS Date) BETWEEN '{1}' AND '{2}'
+                   GROUP BY ord.OrderedAt
                 ", productName, fromDate, toDate);
                 return GetDashboardItemByConditions(sql);
             }

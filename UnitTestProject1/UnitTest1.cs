@@ -99,14 +99,117 @@ namespace UnitTestProject1
         }
 
         [TestMethod]
-        public void UpdatePasswordTest()
+        public void UpdatePasswordSuccessTest()
         {
-            string oldPassword = null;
-            string newPassword = null;
-            int id = 1;
-            var result = UserService.UpdatePassword(id,oldPassword,newPassword);
+            string oldPassword = "123456";
+            string newPassword = "12345678";
+            int id = 2;
+            var result = UserService.UpdatePassword(id, oldPassword, newPassword);
 
             Assert.AreEqual(result, 1);
+        }
+
+        [TestMethod]
+        public void UpdatePasswordFailTest()
+        {
+            string oldPassword = "1231231231231231232123";
+            string newPassword = "12345678";
+            int id = 2;
+            var result = UserService.UpdatePassword(id, oldPassword, newPassword);
+
+            Assert.AreEqual(result, 0);
+        }
+
+        [TestMethod]
+        public void GetUserInformationByIdTest()
+        {
+            int id = 2;
+            var result = UserService.GetUserInformationById(id);
+
+            Assert.IsTrue(result.FullName != null);
+        }
+
+        [TestMethod]
+        public void GetDateToDateAllOrderTest()
+        {
+            DateTime fromDate = new DateTime(2023, 1, 24);
+            DateTime toDate = new DateTime(2023, 2, 24);
+            int channelId = 2;
+            string orderStatus = string.Format("COMPLETED");
+
+            var result = OrderService.GetDateToDateAllOrder(fromDate.ToString("yyyy'-'MM'-'dd"), toDate.ToString("yyyy'-'MM'-'dd"), channelId, orderStatus);
+
+            Assert.IsTrue(result.Count > 0);
+
+            var resultWithoutChannelId = OrderService.GetDateToDateAllOrder(fromDate.ToString("yyyy'-'MM'-'dd"), toDate.ToString("yyyy'-'MM'-'dd"), null, orderStatus);
+
+            Assert.IsTrue(resultWithoutChannelId.Count > 0);
+
+            var resultWithoutOrderStatus = OrderService.GetDateToDateAllOrder(fromDate.ToString("yyyy'-'MM'-'dd"), toDate.ToString("yyyy'-'MM'-'dd"), channelId, null);
+
+            Assert.IsTrue(resultWithoutOrderStatus.Count > 0);
+        }
+
+        [TestMethod]
+        public void GetDateToDateAllOderNoneValueTest()
+        {
+            try
+            {
+
+                DateTime fromDate = new DateTime(2023, 1, 24);
+                DateTime toDate = new DateTime(2023, 1, 24);
+                int channelId = 4;
+                string orderStatus = string.Format("COMPLETED");
+
+                var result = OrderService.GetDateToDateAllOrder(fromDate.ToString("yyyy'-'MM'-'dd"), toDate.ToString("yyyy'-'MM'-'dd"), channelId, orderStatus);
+            }
+            catch (Exception ex)
+            {
+                Assert.IsTrue(ex is Exception);
+                throw new ArgumentNullException("There's no order");
+            }
+
+        }
+
+        [TestMethod]
+        public void GetOrderDetailByIdTest()
+        {
+            int id = 1;
+            var result = OrderService.GetOrderDetailById(id);
+
+            Assert.IsNotNull(result);
+        }
+        [TestMethod]
+        public void GetOrderDetailByNullIdTest()
+        {
+            int id = 0;
+            var result = OrderService.GetOrderDetailById(id);
+
+            Assert.IsNull(result);
+        }
+
+        [TestMethod]
+        public void UpdateReturnOrderTest()
+        {
+            string updateStatus = "CANCEL";
+            User user = UserService.GetUserInformationById(2);
+            int returnId = 22;
+
+            var result = OrderService.UpdateReturnOrder(returnId, updateStatus, user);
+
+            Assert.AreEqual(result, 1);
+        }
+
+        [TestMethod]
+        public void UpdateReturnOrderFailTest()
+        {
+            string updateStatus = "PENDING";
+            User user = UserService.GetUserInformationById(2);
+            int returnID = 0;
+
+            var result = OrderService.UpdateReturnOrder(returnID, updateStatus, user);
+
+            Assert.AreEqual(result, 0);
         }
     }
 

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 public static class DataLogic
 {
-
+    public static readonly string _connectionString = @"Data Source=.;Initial Catalog=OMSDb;Integrated Security=True";
     public static class SqlHelper
     {
         // Set the connection, command, and then execute the command with non query.  
